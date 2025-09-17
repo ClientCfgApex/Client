@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CLIENT – Config Store</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: "Arial", sans-serif;
+      background-color: black;
+      color: white;
+      transition: background-color 0.4s ease, color 0.4s ease, opacity 0.6s ease;
+      opacity: 1;
+    }
+
+    body.preload {
+      opacity: 0;
+    }
+
+    body.fade-out {
+      opacity: 0;
+    }
+
+    /* Navigation */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 40px 50px;
+      background: linear-gradient(to bottom, #222 0%, transparent 100%);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    nav h1 {
+      font-size: 1.8em;
+      font-weight: bold;
+      letter-spacing: 2px;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.3s ease;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 25px;
+      font-weight: bold;
+      transition: color 0.2s ease-in-out;
+    }
+
+    nav a:hover {
+      color: grey;
+    }
+
+    /* Hero */
+    .hero {
+      height: 50vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .hero h2 {
+      font-size: 4em;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .hero p {
+      font-size: 1.2em;
+      max-width: 600px;
+      margin: 0 auto 40px auto;
+      color: #ccc;
+    }
+
+    .hero button {
+      padding: 15px 40px;
+      font-size: 1em;
+      font-weight: bold;
+      border: 2px solid white;
+      background: transparent;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+      box-shadow: 0 0 15px rgba(255,255,255,0.8);
+    }
+
+    .hero button:hover {
+      background: white;
+      color: black;
+      box-shadow: 0 0 25px rgba(255,255,255,1);
+    }
+
+    /* Features */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 10px;
+      padding: 70px 50px;
+      background: #111;
+      margin-top: 350px;
+    }
+
+    .feature {
+      text-align: center;
+    }
+
+    .feature h3 {
+      font-size: 1.5em;
+      margin-bottom: 15px;
+    }
+
+    .feature p {
+      color: #bbb;
+      font-size: 1em;
+    }
+
+    /* Pricing */
+    .pricing {
+      padding: 100px 50px;
+      text-align: center;
+      margin-top: 60px;
+    }
+
+    .pricing h2 {
+      font-size: 2.5em;
+      margin-bottom: 40px;
+    }
+
+    .plans {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .plan {
+      background: #111;
+      padding: 40px;
+      border-radius: 15px;
+      width: 300px;
+      box-shadow: 0 0 15px rgba(255,255,255,0.1);
+    }
+
+    .plan h3 {
+      font-size: 1.8em;
+      margin-bottom: 10px;
+    }
+
+    .plan p {
+      margin: 10px 0;
+      color: #ccc;
+    }
+
+    .plan button {
+      margin-top: 20px;
+      padding: 12px 30px;
+      font-weight: bold;
+      border: 2px solid white;
+      background: transparent;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .plan button:hover {
+      background: white;
+      color: black;
+      box-shadow: 0 5px 15px rgba(252, 252, 252, 0.8);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 30px;
+      background: black;
+      color: #888;
+      border-top: 1px solid white;
+      font-size: 0.9em;
+      margin-top: 60px;
+    }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Overlay background blur (animated) */
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      backdrop-filter: blur(0px);
+      -webkit-backdrop-filter: blur(0px);
+      background: rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      visibility: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition:
+        opacity 0.35s ease,
+        backdrop-filter 0.6s ease,
+        -webkit-backdrop-filter 0.6s ease;
+      z-index: 50;
+    }
+
+    #overlay.active {
+      opacity: 1;
+      visibility: visible;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    /* Settings / Login box */
+    .settings-box {
+      background: rgba(30, 30, 30, 0.88);
+      border-radius: 12px;
+      padding: 26px 28px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 0 30px rgba(0,0,0,0.6);
+      transform: scale(0.96);
+      opacity: 0;
+      transition: transform 0.28s ease, opacity 0.28s ease;
+      width: 420px;
+      max-width: calc(100% - 40px);
+      min-height: 220px;
+      position: relative;
+    }
+
+    #overlay.active .settings-box {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .settings-box h2 {
+      margin-top: 0;
+      margin-bottom: 14px;
+      font-size: 1.4em;
+    }
+
+    .settings-box p.small {
+      color: #ddd;
+      font-size: 0.95em;
+      margin-bottom: 12px;
+    }
+
+    /* Login form elements */
+    .login-input {
+      width: 85%;
+      padding: 10px 12px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      background: rgba(255,255,255,0.06);
+      color: white;
+      font-size: 14px;
+    }
+
+    .login-btn {
+      margin-top: 14px;
+      padding: 10px 18px;
+      background: #2b7cff;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .login-btn:hover { filter: brightness(1.05); }
+
+    /* Small X close in top-right */
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      font-size: 20px;
+      line-height: 1;
+      color: #ddd;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    .modal-close:hover { color: white; background: rgba(255,255,255,0.03); }
+
+    /* Responsive tweaks */
+    @media (max-width: 480px) {
+      .settings-box { width: calc(100% - 30px); padding: 20px; }
+      nav { padding: 20px; }
+    }
+  </style>
+</head>
+<body class="preload">
+
+  <!-- Nav -->
+  <nav>
+    <h1 id="openSettings">CLIENT</h1>
+    <div id="navLinks">
+      <a href="Client.html">Home</a>
+      <a href="features.html">Features</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h2>CLIENT</h2>
+    <p>High-performance configs built for consistency, speed, and results. Take your game to the next level with CLIENT.</p>
+    <button onclick="scrollToPricing()">Buy Now</button>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="features">
+    <div class="feature reveal">
+      <h3>Optimized</h3>
+      <p>Configs fine-tuned for performance and stability.</p>
+    </div>
+    <div class="feature reveal">
+      <h3>Custom</h3>
+      <p>Tailored options for different playstyles and needs.</p>
+    </div>
+    <div class="feature reveal">
+      <h3>Proven</h3>
+      <p>Tested and used by top players for peak performance.</p>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section id="pricing" class="pricing">
+    <h2>Pricing</h2>
+    <div class="plans">
+      <div class="plan reveal">
+        <h3>Basic</h3>
+        <p>Entry-level config</p>
+        <p><strong>$10</strong></p>
+        <button onclick="navigateTo('basic.html')">Buy Now</button>
+      </div>
+      <div class="plan reveal">
+        <h3>Pro</h3>
+        <p>Advanced configs for serious players</p>
+        <p><strong>$20</strong></p>
+        <button onclick="navigateTo('pro.html')">Buy Now</button>
+      </div>
+      <div class="plan reveal">
+        <h3>Elite</h3>
+        <p>Ultimate performance package</p>
+        <p><strong>$30</strong></p>
+        <button onclick="navigateTo('elite.html')">Buy Now</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer id="contact">
+    <p>© 2025 CLIENT. All rights reserved.</p>
+    <p>Contact us at <a href="mailto:ClientCfgApex@gmail.com" style="color:white;">ClientCfgApex@gmail.com</a></p>
+  </footer>
+
+  <!-- Overlay + Login Box -->
+  <div id="overlay" aria-hidden="true">
+    <div class="settings-box" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+      <button class="modal-close" id="closeSettings" aria-label="Close">×</button>
+
+      <h2 id="loginTitle">Staff Login</h2>
+      <p class="small">Enter username and passkey (admins/mods only).</p>
+
+      <form id="loginForm" onsubmit="return false;">
+        <input id="username" class="login-input" type="text" placeholder="Username" autocomplete="username" required>
+        <br>
+        <input id="passkey" class="login-input" type="password" placeholder="Passkey" autocomplete="current-password" required>
+        <br>
+        <button id="loginBtn" class="login-btn" type="submit">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Fade-in on page load
+    window.addEventListener("DOMContentLoaded", () => {
+      setTimeout(() => {
+        document.body.classList.remove("preload");
+      }, 10);
+    });
+
+    // Fade-out on navigation
+    function navigateTo(url) {
+      document.body.classList.add("fade-out");
+      setTimeout(() => {
+        if (url) window.location.href = url;
+      }, 600);
+    }
+
+    document.querySelectorAll("nav a").forEach(link => {
+      link.addEventListener("click", e => {
+        e.preventDefault();
+        navigateTo(link.getAttribute("href"));
+      });
+    });
+
+    // Smooth scroll
+    function scrollToPricing() {
+      document.querySelector('#pricing').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.2 });
+    reveals.forEach(r => observer.observe(r));
+
+    // Overlay / Login
+    const overlay = document.getElementById('overlay');
+    const openBtn = document.getElementById('openSettings');
+    const closeBtn = document.getElementById('closeSettings');
+    const usernameInput = document.getElementById('username');
+    const passkeyInput = document.getElementById('passkey');
+    const loginForm = document.getElementById('loginForm');
+    const navLinks = document.getElementById('navLinks');
+
+    // Strong passkeys
+    const ADMIN_KEY = "u9$Jm2!kQpR7";
+    const MOD_KEY   = "xT4#vB8rLzF0";
+
+    openBtn.addEventListener('click', () => {
+      overlay.classList.add('active');
+      overlay.setAttribute('aria-hidden', 'false');
+      setTimeout(() => usernameInput.focus(), 120);
+    });
+
+    function closeOverlay() {
+      overlay.classList.remove('active');
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+    closeBtn.addEventListener('click', closeOverlay);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeOverlay(); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && overlay.classList.contains('active')) closeOverlay();
+    });
+
+    // Handle login
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const user = usernameInput.value.trim();
+      const key = passkeyInput.value.trim();
+
+      if (!user || !key) {
+        alert('Please enter username and passkey.');
+        return;
+      }
+
+      if (user === "admin" && key === ADMIN_KEY) {
+        addRoleTab("Admin");
+        closeOverlay();
+      } else if (user === "mod" && key === MOD_KEY) {
+        addRoleTab("Moderator");
+        closeOverlay();
+      } else {
+        alert('Invalid username or passkey.');
+        passkeyInput.value = '';
+        passkeyInput.focus();
+      }
+    });
+
+    // Add role tab to nav
+    function addRoleTab(role) {
+      if (!document.getElementById(role.toLowerCase() + "-tab")) {
+        const roleLink = document.createElement("a");
+        roleLink.textContent = role;
+        roleLink.href = "#";
+        roleLink.id = role.toLowerCase() + "-tab";
+        navLinks.appendChild(roleLink);
+      }
+    }
+  </script>
+
+</body>
+</html>
